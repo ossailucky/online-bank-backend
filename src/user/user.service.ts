@@ -1,11 +1,44 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable,BadRequestException, ConflictException, HttpException, HttpStatus, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-
+import { InjectRepository } from '@nestjs/typeorm';
+import { User } from './entities/user.entity';
+import { Repository } from 'typeorm';
+import * as bcrypt from 'bcrypt';
 @Injectable()
 export class UserService {
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  constructor(
+    @InjectRepository(User)
+    private usersRepository: Repository<User>,
+  ){}
+  async create(userData: CreateUserDto): Promise<User> {
+    try {
+      const existingUser = await this.usersRepository.findOne({
+        where: { email: userData.email },
+      });
+  
+      if (existingUser) {
+        console.log('User with this email already exists:', existingUser.email);
+        
+        throw new ConflictException('User with this email already exists');
+      }
+
+  
+      const hashedPassword = await bcrypt.hash(userData.password, 10);
+      
+      const user = this.usersRepository.create({
+        ...userData,
+        password: hashedPassword,
+      });
+    
+      // const url = `${process.env.APP_URL}/verify-email?token=${tokenSign}`;
+      // await this.mailService.sendEmailVerification(userData.email, url, userData.username);
+
+
+      return this.usersRepository.save(user);
+    } catch (error) {
+      throw error;
+    }
   }
 
   findAll() {
