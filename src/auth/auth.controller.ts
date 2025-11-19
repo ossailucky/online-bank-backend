@@ -1,15 +1,27 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
+import { ApiTags } from '@nestjs/swagger';
+import { UserService } from 'src/user/user.service';
+import { Response } from 'express';
 
-@Controller('auth')
+ApiTags('auth')
+@Controller({version: '1', path: 'auth'})
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService,
+    private readonly userService: UserService
+  ) {}
 
-  @Post()
-  create(@Body() createAuthDto: CreateAuthDto) {
-    return this.authService.create(createAuthDto);
+  @Post("login")
+ async  login( @Res() res: Response, @Body() createAuthDto: CreateAuthDto) {
+    const {data, token} =  await this.authService.validate(createAuthDto);
+
+    res.setHeader('Authorization', `Bearer ${token}`);
+    res.json({
+      data,
+      token
+    })
   }
 
   @Get()

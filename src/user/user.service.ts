@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { CreateAuthDto } from 'src/auth/dto/create-auth.dto';
 @Injectable()
 export class UserService {
   constructor(
@@ -36,6 +37,18 @@ export class UserService {
 
 
       return this.usersRepository.save(user);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async findUser(data: CreateAuthDto): Promise<any> {
+    try {
+      const user = await this.usersRepository.findOne({where:{email: data.email}});
+    
+      if(!user) throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+        
+      return user;
     } catch (error) {
       throw error;
     }
