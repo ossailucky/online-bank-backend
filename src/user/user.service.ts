@@ -56,8 +56,18 @@ export class UserService {
 
   
 
-  findAll() {
-    return `This action returns all user`;
+ async findAll(): Promise<User[]> {
+  try {
+    const users = await this.usersRepository.find();
+    if(!users || users.length === 0) {
+      throw new NotFoundException('No users found');
+    }
+    return users;
+  } catch (error) {
+    throw error;
+    
+  }
+    
   }
 
   async findOne(id: number): Promise<User> {
