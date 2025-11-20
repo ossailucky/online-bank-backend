@@ -5,6 +5,7 @@ import { UpdateAuthDto } from './dto/update-auth.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { UserService } from 'src/user/user.service';
 import { Response } from 'express';
+import { CreateUserDto } from 'src/user/dto/create-user.dto';
 
 ApiTags('auth')
 @Controller({version: '1', path: 'auth'})
@@ -23,6 +24,18 @@ export class AuthController {
       token
     })
   }
+
+  @Post("register")
+  async register(@Res() res: Response, @Body() userDto: CreateUserDto){
+    const data = await this.userService.create(userDto);
+    const token = await this.authService.getToken({
+      id:data.id,
+      email:data.email
+    })
+    res.setHeader('Authorization', `Bearer ${token}`);
+    res.json({data, token});
+  }
+
 
   @Get()
   findAll() {

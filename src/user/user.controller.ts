@@ -9,10 +9,10 @@ ApiTags("user")
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Post("register")
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto);
-  }
+  // @Post("register")
+  // create(@Body() createUserDto: CreateUserDto) {
+  //   return this.userService.create(createUserDto);
+  // }
 
   @Get()
   findAll() {
