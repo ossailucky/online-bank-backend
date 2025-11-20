@@ -98,7 +98,15 @@ export class UserService {
     }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(id: number): Promise<string> {
+    try {
+      const user = await this.usersRepository.findOneBy({ id });
+      if(!user) throw new NotFoundException('User not found');
+      await this.usersRepository.remove(user);
+      return `User has been removed`;
+    } catch (error) {
+      throw error;
+      
+    }
   }
 }
