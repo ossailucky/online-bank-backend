@@ -9,6 +9,7 @@ import 'dotenv/config';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { AuthModule } from './auth/auth.module';
+import { MailModule } from './mail/mail.module';
 
 
 
@@ -38,6 +39,7 @@ Handlebars.registerHelper('toLowerCase', function (str) {
     }),
     UserModule,
     AuthModule,
+    MailModule,
     
   ]
     ,
