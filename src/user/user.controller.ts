@@ -1,6 +1,6 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } from '@nestjs/common';
 import { UserService } from './user.service';
-import { CreateUserDto } from './dto/create-user.dto';
+import { CreateUserDto, ResetPasswordDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
@@ -18,6 +18,16 @@ export class UserController {
   //   return this.userService.create(createUserDto);
   // }
 
+
+  @Post('forgot-password')
+  forgotPassword(@Body('email') email: string) {
+    return this.userService.forgotPassword(email);
+  }
+
+  @Post('reset-password')
+  resetPassword(@Query('token') token: string, @Body() dto: ResetPasswordDto) {
+    return this.userService.resetPassword(dto,token);
+  }
   
   @UseGuards(JwtAuthGuard,RolesGuard)
   @hasRoles(UserRole.ADMIN)

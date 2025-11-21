@@ -5,6 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 // import { MailModule } from 'src/mail/mail.module';
 import { JwtModule } from '@nestjs/jwt';
+import { MailModule } from 'src/mail/mail.module';
 
 @Module({
   imports: [
@@ -13,7 +14,7 @@ import { JwtModule } from '@nestjs/jwt';
       secret: process.env.EMAIL_SECRET || 'supersecretkey',
       signOptions: { expiresIn: "1h"},
     }),
-   // forwardRef(() => MailModule),
+    forwardRef(() => MailModule),
   ],
   controllers: [UserController],
   providers: [UserService],

@@ -1,16 +1,21 @@
 import { Injectable,BadRequestException, ConflictException, HttpException, HttpStatus, NotFoundException } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
+import { CreateUserDto, ResetPasswordDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { CreateAuthDto } from 'src/auth/dto/create-auth.dto';
+import { JwtService } from '@nestjs/jwt';
+import { MailService } from 'src/mail/mail.service';
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
+    private readonly jwtService: JwtService,
+    private readonly mailService: MailService,
+    
   ){}
   async create(userData: CreateUserDto): Promise<User> {
     try {
@@ -39,6 +44,46 @@ export class UserService {
       return this.usersRepository.save(user);
     } catch (error) {
       throw error;
+    }
+  }
+
+  async forgotPassword(email: string) {
+    try {
+      const user = await this.usersRepository.findOne({where:{ email: email} });
+    if (!user) throw new NotFoundException('User not found');
+  
+    const token = this.jwtService.sign({ email: user.email }, {
+      secret: process.env.JWT_RESET_SECRET,
+      expiresIn: '15m',
+    });
+  
+    const resetUrl = `${process.env.APP_URL}/reset-password?token=${token}`; // or frontend URL
+  
+    await this.mailService.sendPasswordReset(user.email,resetUrl,user.fullName);
+  
+    return { message: 'Password reset link sent to your email.' };
+    } catch (error) {
+      throw error;
+      
+    }
+    
+  }
+
+  async resetPassword(dto: ResetPasswordDto, token:string) {
+    try {
+      const payload = this.jwtService.verify(token, {
+        secret: process.env.JWT_RESET_SECRET,
+      });
+  
+      const user = await this.usersRepository.findOne({where: { email: payload.email }});
+      if (!user) throw new NotFoundException('User not found');
+  
+      user.password = await bcrypt.hash(dto.newPassword, 10);
+      await this.usersRepository.save(user);
+  
+      return { message: 'Password reset successfully.' };
+    } catch (err) {
+      throw new BadRequestException('Invalid or expired reset token.');
     }
   }
 

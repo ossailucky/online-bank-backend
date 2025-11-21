@@ -1,25 +1,27 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { MailerService } from '@nestjs-modules/mailer';
+
 
 
 @Injectable()
 export class MailService {
-  create(createMailDto: string) {
-    return 'This action adds a new mail';
+  constructor(private readonly mailerService: MailerService) {}
+
+  async sendPasswordReset(to: string, url: string, name: string) {
+    try {
+      await this.mailerService.sendMail({
+        to,
+        subject: 'Reset Your Password',
+        text: 'Click the link to reset your password.',
+        template: 'password-reset',
+      context: {
+        name,
+        url,
+      }
+      });
+    } catch (error) {
+      throw new HttpException(error.message || 'Email sending failed.', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
-  findAll() {
-    return `This action returns all mail`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} mail`;
-  }
-
-  update(id: number, updateMailDto: string) {
-    return `This action updates a #${id} mail`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} mail`;
-  }
 }
