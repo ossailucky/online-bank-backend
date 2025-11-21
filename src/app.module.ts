@@ -10,6 +10,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { AuthModule } from './auth/auth.module';
 import { MailModule } from './mail/mail.module';
+import { TransferModule } from './transfer/transfer.module';
 
 
 
@@ -40,6 +41,7 @@ Handlebars.registerHelper('toLowerCase', function (str) {
     UserModule,
     AuthModule,
     MailModule,
+    TransferModule,
     
   ]
     ,
